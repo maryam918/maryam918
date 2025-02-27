@@ -1,0 +1,139 @@
+import tkinter as tk
+from tkinter import scrolledtext
+
+root = tk.Tk()
+root.title("R Tawy Nfr")
+root.geometry("400x600")
+root.configure(bg="#075E54")
+
+# Global variable to track selected operation
+selected_character = None
+
+# Header
+header_frame = tk.Frame(root, bg="#ffe03c", height=50)
+header_frame.pack(fill="x")
+chat_name = tk.Label(header_frame, text="Chatbot", font=("Arial", 14, "bold"), bg="#075E54", fg="white")
+chat_name.pack(side="left")
+
+# Chat area
+chat_area = scrolledtext.ScrolledText(root, wrap=tk.WORD, bg="#ECE5DD", font=("Arial", 12), height=20, state="disabled")
+chat_area.pack(padx=10, pady=5, fill="both", expand=True)
+
+# Message entry area
+message_frame = tk.Frame(root, bg="white", height=50)
+message_frame.pack(fill="x", side="bottom")
+message_entry = tk.Entry(message_frame, font=("Arial", 12), width=30, bd=0)
+message_entry.pack(side="left", padx=5, expand=True)
+
+# Send button
+send_button = tk.Button(message_frame, text="Send", font=("Arial", 12), command=lambda: send_message())
+send_button.pack(side="right", padx=5)
+
+# Responses dictionary
+responses = {
+    "thutmose 3": {
+        "hello": "Hey, how ya doing?",
+        "hey": "Hey, how ya doing?",
+        "how are you": "Just tired from my battles. Imagine I won over the course of 17 campaigns.",
+        "wow your parents must be proud": "My dad, Thutmose II, is very proud of me. Not sure about my stepmother Hatshepsut.",
+        "are you showing off?": "I must be. Else, give me a name that never lost a battle and became king at a young age."
+    },
+    "nefertiti": {
+        "hello": "Hey you, have you seen my daughters anywhere?",
+        "hey": "Hey you, have you seen my daughters anywhere?",
+        "you have daughters?": "I have 6 daughters, but raising them is exhausting. Not to mention co-ruled with my husband.",
+        "how many daughters?": "I have 6 daughters, but raising them is exhausting. Not to mention co-ruled with my husband.",
+        "how long have you been married": "I married when I was 15."
+    },
+    "hatshepsut": {
+        "hello": "Hello there, will you not bow in front of your queen?",
+        "hey": "Hello there, will you not bow in front of your queen?",
+        "why": "Because I'm your first female pharaoh of Kemet.",
+        "how long did you rule?": "I was the longest reigning female pharaoh in Kemet, ruling for more than 20 years."
+    },
+    "imhotep": {
+        "hello": "Hello, do you want to develop a pyramid?",
+        "hey": "Hello, do you want to develop a pyramid?",
+        "you can do that?": "Yes, I developed the pyramid when I built the step pyramid tomb of Pharaoh Djoser.",
+        "what else can you do?": "I'm a scholar, priest, architect, and physician."
+    }
+}
+
+# Hieroglyphs alphabet
+hieroglyphics_alphabets = {
+    "a": "𓄿", "b": "𓃀", "c": "𓍿", "d": "𓂧",
+    "e": "𓇋", "f": "𓆑", "g": "𓎼", "h": "𓉔",
+    "i": "𓇋", "j": "𓆓", "k": "𓎡", "l": "𓃭",
+    "m": "𓅓", "n": "𓈖", "o": "𓍯", "p": "𓊪",
+    "q": "𓏘", "r": "𓂋", "s": "𓋴", "t": "𓏏",
+    "u": "𓅱", "v": "𓆑", "w": "𓅱", "x": "𓐍",
+    "y": "𓇌", "z": "𓊃", "sh": "𓈙", "ch": "𓍿"
+}
+
+# Welcome Message
+def show_welcome_message():
+    chat_area.config(state="normal")
+    chat_area.insert(tk.END, "Welcome to R Tawy Nfr! Please choose an operation:\n")
+    chat_area.insert(tk.END, "1. Write my name in hieroglyphics (type: Write my name [your name])\n")
+    chat_area.insert(tk.END, "2. Chat with an ancient character (type: Chat with [Thutmose 3 / Nefertiti / Hatshepsut / Imhotep])\n")
+    chat_area.config(state="disabled")
+
+show_welcome_message()
+
+def text_to_hiero(text):
+    text = text.lower()
+    translated = ""
+    i = 0
+    while i < len(text):
+        if text[i:i + 2] in hieroglyphics_alphabets:
+            translated += hieroglyphics_alphabets[text[i:i + 2]]
+            i += 2
+        elif text[i] in hieroglyphics_alphabets:
+            translated += hieroglyphics_alphabets[text[i]]
+            i += 1
+        else:
+            translated += text[i]
+            i += 1
+    return translated
+
+def get_response(character, user_input):
+    return responses.get(character.lower(), {}).get(user_input.lower().strip(), "I do not understand you!")
+
+def send_message():
+    global selected_character
+    message = message_entry.get().strip().lower()
+    
+    if not message:
+        return
+    
+    chat_area.config(state="normal")
+    chat_area.insert(tk.END, f"You: {message}\n", "user_message")
+    
+    response = ""
+    
+    if message.startswith("write my name"):
+        name = message[14:].strip()
+        if name:
+            translated_name = text_to_hiero(name)
+            response = f"Hieroglyphics: {translated_name}"
+        else:
+            response = "Please provide a name to translate."
+    
+    elif message.startswith("chat with"):
+        selected_character = message[10:].strip().lower()
+        if selected_character in responses:
+            response = f"Chat started with {selected_character.capitalize()}. Type your messages!"
+        else:
+            response = "Invalid character. Choose from Thutmose 3, Nefertiti, Hatshepsut, or Imhotep."
+    
+    elif selected_character:
+        response = get_response(selected_character, message)
+    
+    else:
+        response = "I didn't understand that. Please try again."
+
+    chat_area.insert(tk.END, f"Chatbot: {response}\n", "chatbot_message")
+    chat_area.config(state="disabled")
+    message_entry.delete(0, tk.END)
+
+root.mainloop()
